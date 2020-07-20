@@ -11,8 +11,8 @@
 	<br>
 	<marquee><i>Coded this game today : Shekhar Dixit </i></marquee>
 	<script>
-		// Addding ships 
-		// Giving them speed
+		// Correcting the drawobject
+		// Adding Bullets
 
 		var canvas = document.getElementById("myCanvas");
 		var ctx = canvas.getContext("2d");
@@ -25,10 +25,49 @@
 			//Access image from array of images
 			var currentImage = object.images[currentImageIndex];
 			//Draw of canvas
-			ctx.drawImage(currentImage,object.x,object.y,object.width,object.height);
+			ctx.drawImage(currentImage,object.x-(object.width/2),object.y-(object.height/2),object.width,object.height);
 		}
 
 		var WIDTH = 520;
+		var HEIGHT = 520;
+
+		var bullets = [] ;	
+		var bulletImage1 = new Image(); bulletImage1.src = ["https://i.imgur.com/dM81aDs.gif"];
+		var bulletImage2 = new Image(); bulletImage2.src = ["https://i.imgur.com/NyaUjNn.gif"];
+
+		
+		function addBullet(x,y){
+			var bullet = {};
+			bullet.images = [bulletImage1,bulletImage2];
+			bullet.x = x;
+			bullet.y = y;
+			bullet.width = 50;
+			bullet.height = 50;
+			bullet.speedX = 0;
+			bullet.speedY = 7;
+			bullet.active = true;			
+			bullet.move = function(){
+				this.y += this.speedY; 
+				if( this.y >=HEIGHT ){
+					this.active = false;
+				}
+			}
+			bullets.push(bullet);
+		}
+
+		function drawAndMoveBullets(){
+			var temp = [];
+			for(var i=0;i<bullets.length;i++){
+				bullets[i].move();
+				drawObject(bullets[i]);
+				// Only add active bullets				
+				if(bullets[i].active){
+					temp.push(bullets[i]);
+				}
+			}
+			bullets = temp;
+		}
+
 
 		var ships = [];
 		var shipImages = [];
@@ -51,6 +90,7 @@
 		for(var i=0;i<5;i++){
 			var ship = {};
 			ship.images = shipImages;
+
 			ship.x = (Math.random()*1000000)%WIDTH;
 			ship.y = 0;
 			ship.width = 80;
@@ -59,7 +99,7 @@
 			ship.speedY = 0.7;
 
 			ship.move = function(){
-				if( this.x+this.width >= WIDTH && this.speedX >0 ){
+				if( this.x >= WIDTH && this.speedX >0 ){
 					// now move in left
 					this.speedX = - this.speedX;
 				}
@@ -75,8 +115,15 @@
 					this.y = -50;
 				} 
 			}
+
+			ship.fireBullet = function(){
+				if(Math.random()<0.01)
+				addBullet(this.x,this.y);
+			}
+
 			ships.push(ship);			
 		}
+
 
 
 		var alienImages = [];
@@ -100,7 +147,6 @@
 		//step 2
 		function handleKey(event, status) {
 			var currentController = keyMap[event.keyCode];
-		    console.log(status);
 			if(!!currentController){
 				currentController.active = status;
 			}
@@ -131,14 +177,16 @@
 				if( currentController.active){
 					currentController.onactive();
 				}
-				console.log(JSON.stringify(keyMap))
 			}
 
 			drawObject(alien);
 			for(var i=0;i<ships.length;i++){
 				drawObject(ships[i]);
 				ships[i].move();				
+				ships[i].fireBullet();
 			}
+
+			drawAndMoveBullets();
 		}
 
 		setInterval(update,50);
