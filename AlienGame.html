@@ -11,8 +11,9 @@
 	<br>
 	<marquee><i>Coded this game today : Shekhar Dixit </i></marquee>
 	<script>
-		// Correcting the drawobject
-		// Adding Bullets
+		// Adding fire 
+		// Generate in 300 ms
+		// Add in update !
 
 		var canvas = document.getElementById("myCanvas");
 		var ctx = canvas.getContext("2d");
@@ -31,11 +32,48 @@
 		var WIDTH = 520;
 		var HEIGHT = 520;
 
+		var fires = [] ;	
+		var lastFireAt = new Date().getTime();
+		var fireImage = new Image(); fireImage.src = ["https://i.imgur.com/pPvOuhq.png"];
+		function addFire(x,y){
+			var fire = {};
+			fire.images = [fireImage];
+			fire.x = x;
+			fire.y = y;
+			fire.width = 10;
+			fire.height = 10;
+			fire.speedX = 0;
+			fire.speedY = -7;
+			fire.active = true;			
+			fire.move = function(){
+				this.y += this.speedY; 
+				if( this.y <= 0 ){
+					this.active = false;
+				}
+			}
+			fires.push(fire);
+		}
+
+		function drawAndMoveFires(){
+			var temp = [];
+			for(var i=0;i<fires.length;i++){
+				fires[i].move();
+				drawObject(fires[i]);
+				// Only add active bullets				
+				if(fires[i].active){
+					temp.push(fires[i]);
+				}
+			}
+			fires = temp;
+			console.log(fires);
+		}
+
+
+
 		var bullets = [] ;	
 		var bulletImage1 = new Image(); bulletImage1.src = ["https://i.imgur.com/dM81aDs.gif"];
 		var bulletImage2 = new Image(); bulletImage2.src = ["https://i.imgur.com/NyaUjNn.gif"];
 
-		
 		function addBullet(x,y){
 			var bullet = {};
 			bullet.images = [bulletImage1,bulletImage2];
@@ -90,7 +128,6 @@
 		for(var i=0;i<5;i++){
 			var ship = {};
 			ship.images = shipImages;
-
 			ship.x = (Math.random()*1000000)%WIDTH;
 			ship.y = 0;
 			ship.width = 80;
@@ -134,7 +171,7 @@
 			image.src = alienImageUrls[i];
 			alienImages.push(image);
 		}
-
+		
 		var alien = {};	alien.images = alienImages ; alien.width = 100; alien.height = 100; alien.x=300; alien.y=300; alien.speed = 7;
 
 		var keyMap = {};
@@ -142,7 +179,13 @@
 		keyMap[40]	= { name :"down",	active:false , onactive: function() { alien.y+=alien.speed; } };
 		keyMap[37]	= { name :"left",	active:false , onactive: function() { alien.x-=alien.speed; } };
 		keyMap[39]	= { name :"right",	active:false , onactive: function() { alien.x+=alien.speed; } };
-		keyMap[32]	= { name :"space", 	active:false , onactive: function() { fireBullet(); } };
+		keyMap[32]	= { name :"space", 	active:false , onactive: function() { 
+																				if(new Date().getTime() - lastFireAt>300) { 
+																					lastFireAt= new Date().getTime() ; 
+																					addFire(alien.x,alien.y-30); 
+																				} 
+																			}
+		};
 
 		//step 2
 		function handleKey(event, status) {
@@ -187,6 +230,7 @@
 			}
 
 			drawAndMoveBullets();
+			drawAndMoveFires();
 		}
 
 		setInterval(update,50);
