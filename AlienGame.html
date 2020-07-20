@@ -9,7 +9,8 @@
 		
 	</canvas>
 	<br>
-	<marquee><i>Coded this game today : Shekhar Dixit </i></marquee>
+	<marquee><i>Coded this game today : ADD YOUR NAME HERE </i></marquee>
+
 	<script>
 		// Adding fire 
 		// Generate in 300 ms
@@ -65,10 +66,7 @@
 				}
 			}
 			fires = temp;
-			console.log(fires);
 		}
-
-
 
 		var bullets = [] ;	
 		var bulletImage1 = new Image(); bulletImage1.src = ["https://i.imgur.com/dM81aDs.gif"];
@@ -124,7 +122,7 @@
 			shipImages.push(shipImage);
 		}
 
-			
+
 		for(var i=0;i<5;i++){
 			var ship = {};
 			ship.images = shipImages;
@@ -162,7 +160,6 @@
 		}
 
 
-
 		var alienImages = [];
 		var alienImageUrls = ["https://i.imgur.com/tvJOu59.png","https://i.imgur.com/e1pkJRF.png","https://i.imgur.com/aRumf1r.png","https://i.imgur.com/jjOPpWL.png","https://i.imgur.com/hsdEpsM.png","https://i.imgur.com/u5eNyl8.png"];
 		 
@@ -171,8 +168,8 @@
 			image.src = alienImageUrls[i];
 			alienImages.push(image);
 		}
-		
-		var alien = {};	alien.images = alienImages ; alien.width = 100; alien.height = 100; alien.x=300; alien.y=300; alien.speed = 7;
+
+		var alien = {};	alien.images = alienImages ; alien.width = 100; alien.height = 100; alien.x=300; alien.y=HEIGHT-100; alien.speed = 7;
 
 		var keyMap = {};
 		keyMap[38]	= { name :"up",		active:false , onactive: function() { alien.y-=alien.speed; } };
@@ -195,7 +192,25 @@
 			}
 		}
 
+
+        // Play music on loop 
+        // Music credits to Alan Walker ;)
+    	var isPlayingMusic = false; 
+        function playMusicNow(){
+        	isPlayingMusic = true;
+	        var audio = new Audio('https://nhacchuong68.com/wp-content/uploads/2019/07/Alan-Walker-Faded-Instrumental-Version.mp3');
+	        audio.addEventListener('ended', function () {
+	            this.currentTime = 0;
+	            this.play();
+	        }, false);
+
+	        audio.play();
+        }
+
+
+
 		document.addEventListener("keydown", function(event) {
+			if(!isPlayingMusic) playMusicNow();
 		    handleKey(event, true);
 		});
 
@@ -231,6 +246,23 @@
 
 			drawAndMoveBullets();
 			drawAndMoveFires();
+
+			for(var i=0;i<fires.length;i++){
+				var fire = fires[i]; 
+				for(var j=0; j<ships.length;j++){
+					var ship = ships[j];
+					var x1x2 = (fire.x-ship.x)*(fire.x-ship.x);	
+					var y1y2 = (fire.y-ship.y)*(fire.y-ship.y);	
+					var distance = Math.sqrt( x1x2 + y1y2 ) ;
+					if(distance<ship.width-20){
+						ship.x = (Math.random()*10000000)%WIDTH;
+						ship.speedX = 3+Math.random()*4;
+						ship.y = 0;
+						fire.active = false;
+					}
+					console.log(distance);
+				}
+			}
 		}
 
 		setInterval(update,50);
